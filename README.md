@@ -1,6 +1,6 @@
-# Image Image Uploader Version 0.1 
+# Image Image Uploader Version 0.2 
 
-An HTML5 image uploader based on jQuery (ALPHA)
+An HTML5 image uploader with Flash fallback based on jQuery (ALPHA)
 
 
 ## Usage

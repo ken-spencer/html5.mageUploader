@@ -40,12 +40,31 @@ body {
     vertical-align: bottom;
 }
 
+.image-uploader-progress {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 5px;
+    height: 5px;
+    background: white;
+    background: rgba(255, 255, 255, .5);
+    border: solid 1px #666666;
+}
+
+.image-uploader-percenter {
+    height: 5px;
+    width: 0%;
+    background-color: blue;
+}
+
 .image-uploader-browse {
-    visibility: hidden;
-    opacity: 0;
     position: absolute;
     bottom: 0;
     left: 0;
+
+    visibility: hidden;
+    opacity: 0;
     transition:visibility 0s linear 0.3s, opacity 0.3s linear;
     -webkit-transition:visibility 0s linear 0.3s, opacity 0.3s linear;
 }
@@ -57,6 +76,12 @@ body {
     width: 100px;
     border: none;
     background: rgba(00, 181, 244, .9);
+    transition:background-color .2s linear;
+    -webkit-transition:background-color .2s linear;
+}
+
+.image-uploader-browse button.hover {
+    background-color: orange;
 }
 
 #image-uploader:hover .image-uploader-delete,
@@ -84,7 +109,7 @@ $(document).ready(function()
             'default' : 'images/default-avatar-small.png', 
             'image' : 'http://upload.wikimedia.org/wikipedia/commons/b/be/Pygoscelis_papua.jpg'
         },
-        'uploadPath' : null
+        'uploadPath' : window.location.href.replace(/\/[^\/]*$/, "") + "/upload.php"
     });
 });
 </script>
