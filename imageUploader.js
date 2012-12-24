@@ -5,7 +5,6 @@
 
 /* Get location of JS file
 */
-
 function imageUploader(selector, options)
 {
     imageUploader.counter ++;
@@ -13,7 +12,7 @@ function imageUploader(selector, options)
         'preview' : {
             "resizeWidth" : 100,
             "resizeHeight" : 100,
-            "default" : null,
+            "default" : null
         },
         'resizeWidth' : null,
         'resizeHeight' : null,
@@ -22,7 +21,7 @@ function imageUploader(selector, options)
         'multiple' : false,
         'debug' : true,
         'id' : 'image-uploader-' + imageUploader.counter,
-        'field_name' : 'image'
+        'fieldName' : 'image'
     }
 
     this.path = this.getPath();
@@ -43,10 +42,10 @@ function imageUploader(selector, options)
 
     this.renderPreview();
     if (this.HTML5) {
-        this.htmlUploader();
+//        this.htmlUploader();
     } else {
-        this.swfUploader();
     }
+        this.swfUploader();
 }
 imageUploader.counter = 0;
 imageUploader.instances = [];
@@ -88,12 +87,12 @@ imageUploader.prototype.htmlUploader = function()
 
     this.sharedHTML();
 
-    this.browse.css({
+    this.browseCont.css({
         'overflow' : 'hidden'
     });
 
-    this.browse.prepend('<div class="image-uploader-input"><input type="file" /></div>');
-    this.input = this.browse.find('input');
+    this.browseCont.prepend('<div class="image-uploader-input"><input type="file" /></div>');
+    this.input = this.browseCont.find('input');
 
     this.input.css({
         'opacity' : 0,
@@ -126,10 +125,10 @@ imageUploader.prototype.htmlUploader = function()
         self.mouseleave();    
     });
 
-    this.browse.on("mousemove", function(evt)
+    this.browseCont.on("mousemove", function(evt)
     {
-        var offset =self.browse.offset();
-        var width = self.browse.width();
+        var offset = self.browseCont.offset();
+        var width = self.browseCont.width();
 
         input.css("right",  width - (evt.pageX - offset.left) - 10);
     });
@@ -150,7 +149,7 @@ imageUploader.prototype.upload = function(file)
 {
     var self = this;
     var formData = new FormData();
-    formData.append(this.options.field_name, file);
+    formData.append(this.options.fieldName, file);
 
     var size = file.size;
     var filename = file.name;
@@ -162,8 +161,7 @@ imageUploader.prototype.upload = function(file)
     */
     if (!this.options.uploadPath && this.options.debug) {
         this.setPreview(file);
-        this.progress.hide();
-        this.browse.fadeIn();
+        this.reset();
         return;
     }
 
@@ -274,7 +272,7 @@ imageUploader.prototype.swfUploader = function()
         "instance" : this.instance,
         "debug" : this.options.debug ? true : "",
         'uploadPath' : this.options.uploadPath,
-        'field_name' : 'image'
+        'fieldName' : 'image'
     };
 
     var attributes = {
@@ -282,7 +280,8 @@ imageUploader.prototype.swfUploader = function()
         "height" : "500",
         "alt" : "",
         "data" : this.path + "/swf/flash_uploader.swf",
-        "type" : "application/x-shockwave-flash"
+        "type" : "application/x-shockwave-flash",
+        "id" : this.options.id + '-object'
     }
 
     var params = {
@@ -303,8 +302,8 @@ imageUploader.prototype.swfUploader = function()
 
     this.sharedHTML();
 
-    this.browse.prepend(html);
-    this.flash = this.browse.find('object');
+    this.browseCont.prepend(html);
+    this.flash = this.browseCont.find('object');
 
     this.flash.css({
         'outline' : 'none',
@@ -314,8 +313,8 @@ imageUploader.prototype.swfUploader = function()
         'left' : 0
     });
 
-    this.flash.prop('width', this.browse.width());
-    this.flash.prop('height', this.browse.height());
+    this.flash.prop('width', this.browseCont.width());
+    this.flash.prop('height', this.browseCont.height());
 
 }
 
@@ -333,10 +332,11 @@ imageUploader.prototype.sharedHTML = function()
 
     this.remove = $(remove).appendTo(this.node);
     this.progress = $(progress).appendTo(this.node);
-    this.browse = $(browse).appendTo(this.node);
+    this.browseCont = $(browse).appendTo(this.node);
+    this.browse = this.browseCont.find('button');
 
-    if (this.browse.css('position') != 'absolute') {
-        this.browse.css('position', 'relative');
+    if (this.browseCont.css('position') != 'absolute') {
+        this.browseCont.css('position', 'relative');
     }
 }
 
@@ -368,12 +368,12 @@ imageUploader.prototype.buildQuery = function(data)
 
 imageUploader.prototype.mouseenter = function()
 {
-    this.browse.find('button').addClass('hover');
+    this.browse.addClass('hover');
 }
 
 imageUploader.prototype.mouseleave = function()
 {
-    this.browse.find('button').removeClass('hover');
+    this.browse.removeClass('hover');
 }
 
 imageUploader.prototype.open = function()
@@ -383,7 +383,11 @@ imageUploader.prototype.open = function()
     percenter.css('width', 0);
 
     this.remove.fadeOut(200);
-    
+
+    if (this.flash) {
+        this.flash.css('left', -5000);
+    }
+
     this.browse.fadeOut(200, function()
     {
         self.progress.fadeIn(200);
@@ -396,6 +400,7 @@ imageUploader.prototype.setProgress = function(position, size)
     var percent = (position / size) * 100;
     var percenter = $(".image-uploader-percenter", this.node);
     percenter.css('width', percent + '%');
+    return true;
 }
 
 imageUploader.prototype.reset = function(success)
@@ -410,6 +415,9 @@ imageUploader.prototype.reset = function(success)
         {
             self.browse.stop().fadeIn();
             self.remove.stop().fadeIn();
+            if (self.flash) {
+                self.flash.css('left', 0);
+            }
         });
     }, 100);
 }

@@ -36,6 +36,13 @@ body {
     -webkit-transition:visibility 0s linear 0.3s, opacity 0.3s linear;
 }
 
+#image-uploader:hover .image-uploader-delete {
+    opacity: 1;    
+    visibility: visible;
+    transition-delay: 0s;
+    -webkit-transition-delay: 0s;
+}
+
 .image-uploader-preview > img {
     vertical-align: bottom;
 }
@@ -63,10 +70,6 @@ body {
     bottom: 0;
     left: 0;
 
-    visibility: hidden;
-    opacity: 0;
-    transition:visibility 0s linear 0.3s, opacity 0.3s linear;
-    -webkit-transition:visibility 0s linear 0.3s, opacity 0.3s linear;
 }
 
 .image-uploader-browse button {
@@ -76,20 +79,27 @@ body {
     width: 100px;
     border: none;
     background: rgba(00, 181, 244, .9);
+
+    visibility: hidden;
+    opacity: 0;
+    transition:visibility 0s linear 0.3s, opacity 0.3s linear, background-color .2s linear;
+    -webkit-transition:visibility 0s linear 0.3s, opacity 0.3s linear, background-color .2s linear;
+
+/*
     transition:background-color .2s linear;
     -webkit-transition:background-color .2s linear;
+*/
 }
 
-.image-uploader-browse button.hover {
-    background-color: orange;
-}
-
-#image-uploader:hover .image-uploader-delete,
-#image-uploader:hover .image-uploader-browse {
+#image-uploader:hover .image-uploader-browse button {
     opacity: 1;    
     visibility: visible;
     transition-delay: 0s;
     -webkit-transition-delay: 0s;
+}
+
+.image-uploader-browse button.hover {
+    background-color: orange;
 }
 
 </style>
