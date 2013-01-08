@@ -3,7 +3,7 @@
 $file = $_FILES['image'];
 
 $sizes = [
-    'thumbnail' => [100, 100],
+    'thumb' => [100, 100],
     'display' => [800, 800],
 ];
 
@@ -47,9 +47,9 @@ foreach ($sizes as $key => $size) {
 
 response('success', 'Upload Successful', $data);
 
-function response($status, $message, $data)
+function response($type, $message, $data)
 {
-    $data['status'] = $status;
+    $data['type'] = $type;
     $data['message'] = $message;
     header('Content-Type: application/json');
     echo json_encode($data);

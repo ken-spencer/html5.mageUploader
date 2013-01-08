@@ -12,7 +12,8 @@ function imageUploader(selector, options)
         'preview' : {
             "resizeWidth" : 100,
             "resizeHeight" : 100,
-            "default" : null
+            "default" : null,
+            "image" : null
         },
         'resizeWidth' : null,
         'resizeHeight' : null,
@@ -36,16 +37,19 @@ function imageUploader(selector, options)
     imageUploader.instances.push(this);
         
     this.node = $(selector);    
+    this.node.addClass('image-uploader-ready');
+
+    var self = this;
 
     var self = this;
     this.HTML5 = window.FileReader ? true : false;
 
     this.renderPreview();
     if (this.HTML5) {
-//        this.htmlUploader();
+        this.htmlUploader();
     } else {
-    }
         this.swfUploader();
+    }
 }
 imageUploader.counter = 0;
 imageUploader.instances = [];
@@ -91,7 +95,7 @@ imageUploader.prototype.htmlUploader = function()
         'overflow' : 'hidden'
     });
 
-    this.browseCont.prepend('<div class="image-uploader-input"><input type="file" /></div>');
+    this.browseCont.prepend('<div class="image-uploader-input"><input type="file" accept="image/*"/></div>');
     this.input = this.browseCont.find('input');
 
     this.input.css({
@@ -136,12 +140,28 @@ imageUploader.prototype.htmlUploader = function()
     this.remove.on('click', function()
     {
         $(this).fadeOut();
-        
-        self.image.fadeOut(function()
+    
+        var xhr = new XMLHttpRequest();
+        xhr.onload = function(evt)
         {
-            self.image.prop('src', self.options.preview.default);
-            self.image.fadeIn();
-        });        
+            if (xhr.status != 200) {
+                alert("There was an error uploading your file");
+                self.reset();
+                return;
+            }
+
+            if (this.getResponseHeader("Content-Type") == 'application/json') {
+                self.deleteResponse(this.responseText);
+            } else {
+                alert(this.responseText || "Error uploading File");
+                self.reset();
+                return;
+            }
+        }
+    
+                            
+        xhr.open('GET', self.options.deletePath, true);
+        xhr.send();  
     });
 }
 
@@ -338,11 +358,10 @@ imageUploader.prototype.sharedHTML = function()
     if (this.browseCont.css('position') != 'absolute') {
         this.browseCont.css('position', 'relative');
     }
-}
 
-imageUploader.prototype.bah = function()
-{
-    alert("humbug");
+    if (opt.deletePath == null || !opt.preview.image) {
+        this.remove.css('display', 'none');
+    }
 }
 
 imageUploader.prototype.getPath = function()
@@ -392,6 +411,9 @@ imageUploader.prototype.open = function()
     {
         self.progress.fadeIn(200);
     });
+
+    this.node.removeClass('image-uploader-ready');
+    this.node.addClass('image-uploader-uploading');
 }
 
 
@@ -406,6 +428,7 @@ imageUploader.prototype.setProgress = function(position, size)
 imageUploader.prototype.reset = function(success)
 {
     var self = this;
+    var opt = this.options;
     var percenter = $(".image-uploader-percenter", this.node);
     percenter.css('width', success ? '100%' : 0);
 
@@ -414,12 +437,61 @@ imageUploader.prototype.reset = function(success)
         self.progress.stop().fadeOut(200, function()
         {
             self.browse.stop().fadeIn();
-            self.remove.stop().fadeIn();
+            if (opt.preview.image && opt.deletePath) {
+                self.remove.stop().fadeIn();
+            } else {
+                self.remove.css('display', 'none');
+            }
+
             if (self.flash) {
                 self.flash.css('left', 0);
             }
+            
+            self.browse.css('opacity', '');
+
+            self.node.removeClass('image-uploader-uploading');
+            self.node.addClass('image-uploader-ready');
         });
     }, 100);
+}
+
+imageUploader.prototype.deleteResponse = function(text)
+{
+    var self = this;
+    var fail = function()
+    {
+        console.log(text);
+        alert("There was an error deleting the file");
+        this.reset();
+    }
+
+
+    if (text.substr(0, 1) == '{' && text.substr(-1, 1) == '}') {
+        try {
+            var data = JSON.parse(text);
+        } catch(e) {
+            fail();
+            return;
+        }    
+
+        console.log("Response: " + data.message);
+        switch(data.type) {
+        case 'success':
+            self.image.fadeOut(function()
+            {
+                self.image.prop('src', self.options.preview.default);
+                self.image.fadeIn();
+            });
+
+            break;
+         default:
+            alert(data.message);
+            this.reset();
+            break;
+        }        
+    } else {
+        fail();
+    }
 }
 
 imageUploader.prototype.response = function(text)
@@ -444,6 +516,7 @@ imageUploader.prototype.response = function(text)
             }); 
         }        
         image.src = src;
+        self.options.preview.image = src;
         self.reset(true);
     }
 
@@ -456,12 +529,13 @@ imageUploader.prototype.response = function(text)
         }    
 
         console.log("Response: " + data.message);
-        switch(data.status) {
+        switch(data.type) {
         case 'success':
-            setPreview(data.images.thumbnail);
+            setPreview(data.images.thumb);
             break;
          default:
             alert(data.message);
+            this.reset();
             break;
         }        
     } else {
