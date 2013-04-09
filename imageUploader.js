@@ -3,6 +3,18 @@
 *  Licensed under the MIT License
 */
 
+(function($)
+{
+    $.fn.imageUploader = function(options)
+    {
+        return this.each(function()
+        {
+            new imageUploader(this, options);
+        });
+    };
+})(jQuery);
+
+
 /* Get location of JS file
 */
 function imageUploader(selector, options)
@@ -543,5 +555,4 @@ imageUploader.prototype.response = function(text)
     };
 
 }
-
 
