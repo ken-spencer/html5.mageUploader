@@ -89,8 +89,8 @@ imageUploader.prototype.renderPreview = function()
 
     if (opt.preview.image) {
         this.image.prop('src',  opt.preview.image);
-    } else if (opt.preview.default) {
-        this.image.prop('src',  opt.preview.default);
+    } else if (opt.preview['default']) {
+        this.image.prop('src',  opt.preview['default']);
     } else {
         this.image.css('display', 'none');
     }
@@ -491,7 +491,7 @@ imageUploader.prototype.deleteResponse = function(text)
         case 'success':
             self.image.fadeOut(function()
             {
-                self.image.prop('src', self.options.preview.default);
+                self.image.prop('src', self.options.preview['default']);
                 self.image.fadeIn();
             });
 
