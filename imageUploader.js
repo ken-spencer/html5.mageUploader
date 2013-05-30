@@ -55,6 +55,7 @@ function imageUploader(selector, options)
 
     var self = this;
     this.HTML5 = window.FileReader ? true : false;
+    this.HTML5 = false;
 
     this.renderPreview();
     if (this.HTML5) {
@@ -65,6 +66,24 @@ function imageUploader(selector, options)
 }
 imageUploader.counter = 0;
 imageUploader.instances = [];
+
+imageUploader.noFlash = function(instance)
+{
+    var uploader = imageUploader[instance];
+
+    var no = $(".no-flash", uploader.browseCont);
+    no.css('width', 100)
+    // has no width, so not visible
+    if (no.prop('offsetWidth') == 0) {
+        return;
+    }
+    uploader.flash.remove();
+    $(".no-flash", uploader.browseCont).remove();
+    uploader.browse.on("click", function()
+    {
+        alert("You must have an up to date version of Flash installed to use this feature");
+    });
+}
 
 imageUploader.prototype.renderPreview = function()
 {
@@ -304,7 +323,7 @@ imageUploader.prototype.swfUploader = function()
         "instance" : this.instance,
         "debug" : this.options.debug ? true : "",
         'uploadPath' : this.options.uploadPath,
-        'fieldName' : 'image'
+        'fieldName' : this.options.fieldName
     };
 
     var attributes = {
@@ -317,6 +336,7 @@ imageUploader.prototype.swfUploader = function()
     }
 
     var params = {
+        "movie" : this.path + "/swf/flash_uploader.swf",
         "wmode" : "transparent",
         "scale" : "noscale",
         "flashVars" : this.buildQuery(flashVars)
@@ -330,6 +350,9 @@ imageUploader.prototype.swfUploader = function()
     for (var param in params) {
         html += '<param name="' + param + '" value="' + params[param] + '" />';
     }
+    html += '<div class="no-flash">';
+    html += '<img src="' + this.path + '/images/pixel.gif" onload="imageUploader.noFlash(\''+ this.instance +'\');"/>';
+    html += '</div>';
     html += "</object>";
 
     this.sharedHTML();
@@ -347,7 +370,6 @@ imageUploader.prototype.swfUploader = function()
 
     this.flash.prop('width', this.browseCont.width());
     this.flash.prop('height', this.browseCont.height());
-
 }
 
 imageUploader.prototype.sharedHTML = function()
@@ -532,7 +554,8 @@ imageUploader.prototype.response = function(text)
         self.reset(true);
     }
 
-    if (text.substr(0, 1) == '{' && text.substr(-1, 1) == '}') {
+
+    if (text.substr(0, 1) == '{' && text.substr(text.length -1, 1) == '}') {
         try {
             var data = JSON.parse(text);
         } catch(e) {
