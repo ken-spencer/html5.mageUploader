@@ -55,7 +55,6 @@ function imageUploader(selector, options)
 
     var self = this;
     this.HTML5 = window.FileReader ? true : false;
-    this.HTML5 = false;
 
     this.renderPreview();
     if (this.HTML5) {
