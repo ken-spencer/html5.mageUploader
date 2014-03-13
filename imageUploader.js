@@ -231,6 +231,7 @@ imageUploader.prototype.upload = function(file)
             self.response(this.responseText);
         } else {
             alert(this.responseText || "Error uploading File");
+
             self.reset();
             return;
         }
@@ -568,7 +569,18 @@ imageUploader.prototype.response = function(text)
             setPreview(data.images.thumb);
             break;
          default:
-            alert(data.message);
+            if (jQuery.fn.dialogOpen) {
+                $(self.node).dialogOpen("<span>" + data.message + "</span>", {
+                    'stem' : true,
+                    'id' : 'form-error-dialog'
+                });
+                setTimeout(function()
+                {
+                    $(self.node).dialogClose();
+                }, 3000);
+            } else {
+                alert(data.message);
+            }
             this.reset();
             break;
         }        
