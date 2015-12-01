@@ -25,7 +25,8 @@ function imageUploader(selector, options)
             "resizeWidth" : 100,
             "resizeHeight" : 100,
             "default" : null,
-            "image" : null
+            "image" : null,
+            'size' : 'thumb'
         },
         'resizeWidth' : null,
         'resizeHeight' : null,
@@ -239,7 +240,7 @@ imageUploader.prototype.upload = function(file)
     
     xhr.upload.onprogress = function(evt)
     {
-        self.setProgress(evt.position,  evt.totalSize);
+        self.setProgress(evt.loaded,  evt.total);
     }
                             
     xhr.open('POST', this.options.uploadPath, true);
@@ -566,7 +567,7 @@ imageUploader.prototype.response = function(text)
         console.log("Response: " + data.message);
         switch(data.type) {
         case 'success':
-            setPreview(data.images.thumb);
+            setPreview(data.images[self.options.preview.size]);
             break;
          default:
             if (jQuery.fn.dialogOpen) {
